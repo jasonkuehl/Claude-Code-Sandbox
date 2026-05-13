@@ -1,0 +1,44 @@
+# network-policy.yaml
+# URL and CIDR rules for the Claude Code sandbox.
+# Apply with: ./sandbox-net.sh apply <sandbox-name>
+
+# Default egress behavior: allow or deny traffic not matched by rules below
+default: balanced
+
+# Hosts to allow (used when default is deny, or to document intentional access)
+allow_hosts:
+  # Anthropic — required for Claude Code
+  - api.anthropic.com
+
+  # Package managers
+  - registry.npmjs.org
+  - pypi.org
+  - files.pythonhosted.org
+
+  # Container registries
+  - registry-1.docker.io
+  - auth.docker.io
+
+  # Source control
+  - github.com
+  - api.github.com
+  - raw.githubusercontent.com
+
+  # OS updates
+  - archive.ubuntu.com
+  - security.ubuntu.com
+
+  # VS Code Remote SSH extensions and updates
+  - update.code.visualstudio.com
+  - vscode.blob.core.windows.net
+  - marketplace.visualstudio.com
+  - "*.gallerycdn.vsassets.io"
+
+  # Add your own:
+  # - api.myservice.com
+
+# Hosts to block
+block_hosts:
+  # Add hosts to block:
+  # - example.com
+

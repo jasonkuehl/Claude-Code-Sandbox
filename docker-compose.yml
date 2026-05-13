@@ -1,0 +1,47 @@
+# docker-compose.yml
+# VS Code Remote SSH sidecar for the Claude Code sbx sandbox.
+# Claude Code itself is managed by "sbx create/run" — not here.
+#
+# Shared folders (all bind-mounted from host):
+#   ./workspace  ↔  /workspace  — sbx also mounts this; files appear in both
+#   ./sandbox    ↔  /sandbox    — drop zone for code, data, configs
+
+name: "${SANDBOX_NAME:-claude-sandbox}"
+
+services:
+  # VS Code Remote SSH — connect from VS Code using "Remote-SSH: Connect to Host"
+  # Host: localhost  Port: 2222  User: root  Password: sandbox
+  vscode-ssh:
+    build:
+      context: .
+      dockerfile: Dockerfile.ssh
+      args:
+        SSH_PASSWORD: ${SSH_PASSWORD:-changeme}
+    image: claude-sandbox-vscode-ssh:local
+    container_name: "${SANDBOX_NAME:-claude-sandbox}-vscode-ssh"
+    ports:
+      - "2222:2222"
+    volumes:
+      - ssh-host-keys:/etc/ssh/keys    # Persist host keys across rebuilds
+      - ${HOME}/.claude:/root/.claude  # OAuth credentials from host
+      - ./workspace:/workspace         # Same host dir sbx mounts into Claude
+      - ./sandbox:/sandbox             # Host-shared drop folder
+    networks:
+      - internal
+
+  # Add your own services below.
+  # Mount the shared drop folder with:  - ./sandbox:/sandbox
+  #
+  # my-service:
+  #   image: my-image:latest
+  #   volumes:
+  #     - ./sandbox:/sandbox
+  #   networks:
+  #     - internal
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  ssh-host-keys:

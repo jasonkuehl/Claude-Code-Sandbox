@@ -1,0 +1,18 @@
+# Runtime directories — created by sandbox-net.sh up
+workspace/
+sandbox/
+
+# Local environment — copy .env.example and fill in your values
+.env
+
+# SSH artifacts
+*.pem
+*.key
+*.crt
+known_hosts
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/settings.json

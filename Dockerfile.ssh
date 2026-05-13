@@ -1,0 +1,51 @@
+FROM node:20-bookworm-slim
+
+# ── Base tools ────────────────────────────────────────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openssh-server \
+    curl \
+    git \
+    python3 \
+    python3-pip \
+    ripgrep \
+    jq \
+    unzip \
+    awscli \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── Claude Code ───────────────────────────────────────────────────────────────
+RUN npm install -g @anthropic-ai/claude-code
+
+# ── Additional software ───────────────────────────────────────────────────────
+# Uncomment or add packages you want available in the VS Code terminal.
+
+# Global npm packages:
+# RUN npm install -g typescript ts-node
+#
+# Python packages:
+# RUN pip3 install --no-cache-dir httpie
+#
+# ─────────────────────────────────────────────────────────────────────────────
+
+ARG SSH_PASSWORD=changeme
+RUN mkdir /var/run/sshd && \
+    echo "root:${SSH_PASSWORD}" | chpasswd
+
+RUN printf '%s\n' \
+    'Port 2222' \
+    'PermitRootLogin yes' \
+    'PasswordAuthentication yes' \
+    'AllowTcpForwarding yes' \
+    'X11Forwarding no' \
+    'PrintMotd no' \
+    'Subsystem sftp /usr/lib/openssh/sftp-server' \
+    'HostKey /etc/ssh/keys/ssh_host_rsa_key' \
+    'HostKey /etc/ssh/keys/ssh_host_ecdsa_key' \
+    'HostKey /etc/ssh/keys/ssh_host_ed25519_key' \
+    > /etc/ssh/sshd_config
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 2222
+CMD ["/entrypoint.sh"]
