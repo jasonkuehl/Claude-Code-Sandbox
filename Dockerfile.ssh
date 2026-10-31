@@ -21,6 +21,13 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
 # ── Claude Code ───────────────────────────────────────────────────────────────
 # Newer npm first: the one bundled with Node ships outdated tar and brace-expansion
 RUN npm install -g npm@latest @anthropic-ai/claude-code && npm cache clean --force
+# npm still bundles undici 6.29.0 (CVE-2026-109383 and two more HIGH); swap in the 6.29.1 patch release.
+# Drop this step once npm ships undici >= 6.29.1.
+RUN npm pack --silent --pack-destination /tmp undici@6.29.1 \
+    && rm -rf /usr/local/lib/node_modules/npm/node_modules/undici \
+    && mkdir /usr/local/lib/node_modules/npm/node_modules/undici \
+    && tar -xzf /tmp/undici-6.29.1.tgz --strip-components=1 -C /usr/local/lib/node_modules/npm/node_modules/undici \
+    && rm /tmp/undici-6.29.1.tgz && npm --version >/dev/null && npm cache clean --force
 
 # ── Additional software ───────────────────────────────────────────────────────
 # Uncomment or add packages you want available in the VS Code terminal.
