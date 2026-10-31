@@ -1,0 +1,8 @@
+# Findings accepted on purpose. The weekly security scan reads this file.
+misconfigurations:
+  - id: DS-0002
+    paths:
+      - Dockerfile.ssh
+    statement: >-
+      sshd has to run as root to authenticate logins, and this sandbox is reached as root
+      over VS Code Remote-SSH by design (see README).

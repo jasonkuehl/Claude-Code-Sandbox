@@ -56,7 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build image for scanning
-        run: docker build -f Dockerfile.ssh --build-arg SSH_PASSWORD=ci-scan -t scan-target .
+        run: docker build -f Dockerfile.ssh -t scan-target .
       # aquasecurity/trivy-action fetches its installer from GitHub with the job token,
       # which is a Gitea token here, so install the release binary directly
       - name: Install Trivy
