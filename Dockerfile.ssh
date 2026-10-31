@@ -1,7 +1,10 @@
-FROM node:20-bookworm-slim
+# Node 24 is the current LTS (Node 20 reached end of life in April 2026)
+FROM node:24-bookworm-slim
 
 # ── Base tools ────────────────────────────────────────────────────────────────
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# The upgrade picks up Debian security fixes the base image doesn't have yet
+# hadolint ignore=DL3005
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     openssh-server \
     curl \
     git \
@@ -16,7 +19,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -f /etc/ssh/ssh_host_*
 
 # ── Claude Code ───────────────────────────────────────────────────────────────
-RUN npm install -g @anthropic-ai/claude-code
+# Newer npm first: the one bundled with Node ships outdated tar and brace-expansion
+RUN npm install -g npm@latest @anthropic-ai/claude-code && npm cache clean --force
 
 # ── Additional software ───────────────────────────────────────────────────────
 # Uncomment or add packages you want available in the VS Code terminal.
