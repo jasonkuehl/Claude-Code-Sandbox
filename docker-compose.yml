@@ -15,10 +15,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.ssh
-      args:
-        SSH_PASSWORD: ${SSH_PASSWORD:-changeme}
     image: claude-sandbox-vscode-ssh:local
     container_name: "${SANDBOX_NAME:-claude-sandbox}-vscode-ssh"
+    environment:
+      SSH_PASSWORD: ${SSH_PASSWORD:-changeme}   # root password, set at container start
     ports:
       - "2222:2222"
     volumes:

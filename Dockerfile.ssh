@@ -11,7 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     jq \
     unzip \
     awscli \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    # openssh-server creates host keys on install; the entrypoint makes this container's own in /etc/ssh/keys
+    && rm -f /etc/ssh/ssh_host_*
 
 # ── Claude Code ───────────────────────────────────────────────────────────────
 RUN npm install -g @anthropic-ai/claude-code
@@ -27,9 +29,9 @@ RUN npm install -g @anthropic-ai/claude-code
 #
 # ─────────────────────────────────────────────────────────────────────────────
 
-ARG SSH_PASSWORD=changeme
-RUN mkdir /var/run/sshd && \
-    echo "root:${SSH_PASSWORD}" | chpasswd
+# The root password is set at container start from SSH_PASSWORD (see entrypoint.sh),
+# so it is not stored in the image or its build history
+RUN mkdir /var/run/sshd
 
 RUN printf '%s\n' \
     'Port 2222' \
@@ -48,4 +50,5 @@ COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 2222
+HEALTHCHECK --interval=30s --timeout=3s CMD bash -c "</dev/tcp/127.0.0.1/2222" || exit 1
 CMD ["/entrypoint.sh"]
